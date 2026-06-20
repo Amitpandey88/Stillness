@@ -1,14 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stillness</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darshan | AI/ML Portfolio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #050507; /* Deepest space grey/black */
+      color: #ffffff;
+    }
+    .title { font-family: 'Space Grotesk', sans-serif; }
+    
+    #canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+    
+    /* Solid crisp cards, no blur */
+    .solid-card {
+      background: #0a0a0c;
+      border: 1px solid rgba(0, 255, 200, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .solid-card:hover {
+      transform: translateY(-8px);
+      border-color: #ff007a; /* Contrast Pink */
+      box-shadow: 0 10px 30px -10px rgba(255, 0, 122, 0.3);
+    }
+    
+    .neon-cyan {
+      text-shadow: 0 0 10px rgba(0, 255, 200, 0.6), 0 0 20px rgba(0, 255, 200, 0.4);
+      color: #00ffc8;
+    }
+    
+    .neon-pink {
+      text-shadow: 0 0 10px rgba(255, 0, 122, 0.6), 0 0 20px rgba(255, 0, 122, 0.4);
+      color: #ff007a;
+    }
+
+    /* Roadmap Game specific styles */
+    .roadmap-node {
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .roadmap-line {
+      transition: background-color 0.8s ease, box-shadow 0.8s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #050507; }
+    ::-webkit-scrollbar-thumb { background: #ff007a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00ffc8; }
+  </style>
 </head>
-<body>
-  <main>
-    <h1>Stillness</h1>
-    <p>Index page created from the provided prompt.</p>
-  </main>
+<body class="overflow-x-hidden">
+  <canvas id="canvas"></canvas>
+
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-[#050507] border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+      <div class="text-2xl font-bold title tracking-tighter neon-cyan">DARSHAN</div>
+      <div class="hidden md:flex gap-8 text-sm font-bold tracking-wide">
+        <a href="#about" class="text-gray-300 hover:text-[#00ffc8] transition-colors">ABOUT</a>
+        <a href="#roadmap" class="text-gray-300 hover:text-[#ff007a] transition-colors">SKILLS</a>
+        <a href="#projects" class="text-gray-300 hover:text-[#00ffc8] transition-colors">PROJECTS</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="min-h-screen flex items-center relative">
+    <div class="max-w-4xl mx-auto px-6 text-center z-10 mt-20 md:mt-0">
+      <h1 class="text-6xl md:text-8xl font-bold title tracking-tighter mb-4 text-white">
+        Hi, I'm <span class="neon-cyan">Darshan</span>
+      </h1>
+      <p class="text-2xl md:text-4xl font-bold mb-8 neon-pink">AI &amp; Machine Learning Engineer</p>
+      <p class="max-w-md mx-auto text-lg text-gray-300 mb-12 font-medium">
+        Building intelligent, scalable neural networks and systems that map the future.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#projects" 
+           class="px-8 py-4 bg-[#00ffc8] text-black hover:bg-white hover:text-black font-bold rounded-full transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,255,200,0.4)]">
+          <i class="fas fa-network-wired"></i> View Outputs
+        </a>
+        <a href="#roadmap" 
+           class="px-8 py-4 bg-[#0a0a0c] border border-[#ff007a] text-[#ff007a] hover:bg-[#ff007a] hover:text-white font-bold rounded-full transition-all shadow-[0_0_15px_rgba(255,0,122,0.2)]">
+          Play Roadmap
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap" class="py-32 relative z-10 bg-[#050507]">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-24">
+        <h2 class="text-4xl md:text-5xl font-bold title mb-4 text-white">Skill Progression <span class="neon-pink">Map</span></h2>
+        <p class="text-[#00ffc8] font-medium text-lg">Hover to solve the pathway and unlock the neural net.</p>
+      </div>
+      
+      <div class="relative wrap overflow-hidden p-4 md:p-10 h-full" id="roadmap-container">
+        <div class="hidden md:block absolute border-opacity-20 border-white h-full border-l-2 left-1/2 top-0 -translate-x-1/2"></div>
+        
+        </div>
+    </div>
+  </section>
+
+  <section id="projects" class="py-24 relative z-10 bg-[#050507] border-t border-gray-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-4xl md:text-5xl font-bold title text-center mb-16 text-white">System <span class="neon-cyan">Outputs</span></h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="solid-card rounded-2xl overflow-hidden group">
+          <div class="h-48 bg-[#0a0a0c] border-b border-gray-800 flex items-center justify-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
+            <i class="fas fa-eye text-6xl text-[#00ffc8] group-hover:scale-110 transition-transform duration-500"></i>
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-bold mb-3 text-white">Vision Transformer for Oncology</h3>
+            <p class="text-gray-300 text-base leading-relaxed">Engineered a custom ViT architecture achieving 96.8% accuracy in tumor detection from MRI scans. Optimized for inference speed on clinical hardware.</p>
+          </div>
+        </div>
+        
+        <div class="solid-card rounded-2xl overflow-hidden group">
+          <div class="h-48 bg-[#0a0a0c] border-b border-gray-800 flex items-center justify-center relative overflow-hidden">
+             <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
+            <i class="fas fa-scale-balanced text-6xl text-[#ff007a] group-hover:scale-110 transition-transform duration-500"></i>
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-bold mb-3 text-white">RAG-Powered Legal Agent</h3>
+            <p class="text-gray-300 text-base leading-relaxed">Fine-tuned open-source LLMs combined with highly-optimized vector databases to navigate complex case law. Reduced document review time by 60%.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="py-32 relative z-10 bg-[#050507] border-t border-gray-800">
+    <div class="max-w-md mx-auto px-6 text-center">
+      <h2 class="text-4xl md:text-5xl font-bold title mb-8 text-white">Initialize <span class="neon-pink">Connection</span></h2>
+      <a href="mailto:your.email@example.com" 
+         class="inline-block px-10 py-4 bg-white text-black font-bold rounded-full hover:bg-[#ff007a] hover:text-white hover:shadow-[0_0_30px_rgba(255,0,122,0.6)] transition-all text-lg">
+        Execute Hello_World →
+      </a>
+      <div class="mt-16 flex justify-center gap-8 text-3xl">
+        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-github"></i></a>
+        <a href="#" class="text-gray-400 hover:text-[#00ffc8] transition-colors"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="text-gray-400 hover:text-[#ff007a] transition-colors"><i class="fab fa-x-twitter"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ----------------------------------------------------
+    // PUZZLE ROADMAP LOGIC (GAME-LIKE UNLOCK)
+    // ----------------------------------------------------
+    const roadmapSkills = [
+      { id: "python", name: "Python Core", desc: "Data structures, OOP, & scripting", icon: "🐍", color: "cyan" },
+      { id: "math", name: "Linear Algebra & Stats", desc: "The mathematical backbone of ML", icon: "➗", color: "pink" },
+      { id: "ml", name: "Classical ML", desc: "Scikit-learn, Random Forests, XGBoost", icon: "📊", color: "cyan" },
+      { id: "dl", name: "Deep Learning Base", desc: "Neural Networks via TensorFlow & PyTorch", icon: "🧠", color: "pink" },
+      { id: "cv", name: "Computer Vision", desc: "CNNs, OpenCV, Image Segmentation", icon: "👁️", color: "cyan" },
+      { id: "nlp", name: "NLP & Transformers", desc: "HuggingFace, LLMs, Attention Mechanisms", icon: "🦜", color: "pink" },
+      { id: "mlops", name: "MLOps & Deployment", desc: "Docker, Kubernetes, AWS, ONNX", icon: "⚙️", color: "cyan" }
+    ];
+
+    let currentUnlockedIndex = 0;
+
+    function renderRoadmap() {
+      const container = document.getElementById('roadmap-container');
+      
+      roadmapSkills.forEach((skill, index) => {
+        // Alignment logic for Zig Zag (Desktop)
+        const isLeft = index % 2 === 0;
+        const alignClass = isLeft ? 'md:flex-row-reverse md:mr-auto' : 'md:ml-auto';
+        const textClass = isLeft ? 'md:text-right' : 'md:text-left';
+        
+        // Coloring
+        const borderGlow = skill.color === 'cyan' ? 'border-[#00ffc8]' : 'border-[#ff007a]';
+        const textGlow = skill.color === 'cyan' ? 'text-[#00ffc8]' : 'text-[#ff007a]';
+
+        // HTML structure for a node
+        const nodeHTML = `
+          <div class="mb-8 flex justify-between items-center w-full md:w-[50%] ${alignClass} group" id="wrap-${index}">
+            
+            <div class="hidden md:flex w-8 h-8 rounded-full bg-[#0a0a0c] border-4 border-gray-700 absolute left-1/2 -translate-x-1/2 z-10 transition-colors duration-500" id="dot-${index}"></div>
+
+            <div class="w-full md:w-[85%] roadmap-node opacity-20 grayscale pointer-events-none cursor-pointer" 
+                 id="node-${index}" 
+                 onmouseenter="unlockNext(${index})"
+                 onclick="unlockNext(${index})">
+              
+              <div class="bg-[#0a0a0c] p-6 rounded-2xl border ${borderGlow} shadow-lg transition-transform hover:-translate-y-2 relative overflow-hidden">
+                <div class="text-4xl mb-3">${skill.icon}</div>
+                <h3 class="text-2xl font-bold text-white mb-2">${skill.name}</h3>
+                <p class="text-gray-400 font-medium">${skill.desc}</p>
+                <div class="mt-4 text-xs font-bold tracking-widest ${textGlow} uppercase flex items-center ${isLeft ? 'md:justify-end' : 'justify-start'}">
+                  ${index === 0 ? 'START HERE' : 'LOCKED'}
+                </div>
+              </div>
+            </div>
+
+            ${index < roadmapSkills.length - 1 ? `<div class="md:hidden w-1 h-12 bg-gray-800 ml-6 roadmap-line" id="mobile-line-${index}"></div>` : ''}
+          </div>
+        `;
+        
+        container.innerHTML += nodeHTML;
+      });
+
+      // Unlock the first node immediately
+      activateNode(0);
+    }
+
+    function activateNode(index) {
+      const node = document.getElementById(`node-${index}`);
+      const dot = document.getElementById(`dot-${index}`);
+      
+      // Remove locked styles
+      node.classList.remove('opacity-20', 'grayscale', 'pointer-events-none');
+      node.classList.add('opacity-100');
+      
+      // Change label to UNLOCKED
+      const label = node.querySelector('.text-xs');
+      if(index !== 0) label.innerText = "SOLVED ✔";
+      
+      // Light up the dot on the timeline
+      if(dot) {
+        const color = roadmapSkills[index].color === 'cyan' ? 'border-[#00ffc8]' : 'border-[#ff007a]';
+        dot.classList.replace('border-gray-700', color);
+        dot.classList.add('bg-white');
+      }
+    }
+
+    function unlockNext(hoveredIndex) {
+      // If user hovers the current highest unlocked node, unlock the next one
+      if (hoveredIndex === currentUnlockedIndex && currentUnlockedIndex < roadmapSkills.length - 1) {
+        
+        // Light up the line connecting them (Mobile)
+        const mobileLine = document.getElementById(`mobile-line-${currentUnlockedIndex}`);
+        if(mobileLine) {
+          mobileLine.classList.replace('bg-gray-800', roadmapSkills[currentUnlockedIndex].color === 'cyan' ? 'bg-[#00ffc8]' : 'bg-[#ff007a]');
+          mobileLine.classList.add('shadow-[0_0_10px_currentColor]');
+        }
+
+        currentUnlockedIndex++;
+        activateNode(currentUnlockedIndex);
+      }
+    }
+
+    // ----------------------------------------------------
+    // HIGH-CONTRAST 3D NEURAL NETWORK (CYAN & MAGENTA)
+    // ----------------------------------------------------
+    let scene, camera, renderer;
+    let neuralNetworkGroup;
+    let targetScrollY = 0;
+    let currentScrollY = 0;
+
+    function initThree() {
+      const canvas = document.getElementById('canvas');
+      
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x050507, 0.012); // Deep dark fog
+      
+      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 50; // Pull camera back to see more space
+      
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x050507, 1); 
+
+      neuralNetworkGroup = new THREE.Group();
+      
+      const nodeCount = 450; 
+      const nodePositions = [];
+      const nodeColors = [];
+      
+      const colorCyan = new THREE.Color(0x00ffc8);
+      const colorPink = new THREE.Color(0xff007a);
+
+      // Distribute nodes in a wide 3D space
+      for(let i = 0; i < nodeCount; i++) {
+        nodePositions.push(
+          (Math.random() - 0.5) * 120, // X stretch
+          (Math.random() - 0.5) * 120, // Y stretch
+          (Math.random() - 0.5) * 80   // Z depth
+        );
+        
+        // Randomly assign Cyan or Pink to nodes
+        const isCyan = Math.random() > 0.5;
+        const color = isCyan ? colorCyan : colorPink;
+        nodeColors.push(color.r, color.g, color.b);
+      }
+
+      // Generate synaptic lines
+      const linePositions = [];
+      const lineColors = [];
+      const maxDistance = 12; // Increase distance for more neural webbing
+
+      for(let i = 0; i < nodeCount; i++) {
+        for(let j = i + 1; j < nodeCount; j++) {
+          const dx = nodePositions[i * 3] - nodePositions[j * 3];
+          const dy = nodePositions[i * 3 + 1] - nodePositions[j * 3 + 1];
+          const dz = nodePositions[i * 3 + 2] - nodePositions[j * 3 + 2];
+          const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+          
+          if(distance < maxDistance) {
+            // Point A
+            linePositions.push(nodePositions[i * 3], nodePositions[i * 3 + 1], nodePositions[i * 3 + 2]);
+            lineColors.push(nodeColors[i * 3], nodeColors[i * 3 + 1], nodeColors[i * 3 + 2]);
+            // Point B
+            linePositions.push(nodePositions[j * 3], nodePositions[j * 3 + 1], nodePositions[j * 3 + 2]);
+            lineColors.push(nodeColors[j * 3], nodeColors[j * 3 + 1], nodeColors[j * 3 + 2]);
+          }
+        }
+      }
+
+      // Nodes Mesh
+      const nodesGeometry = new THREE.BufferGeometry();
+      nodesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(nodePositions, 3));
+      nodesGeometry.setAttribute('color', new THREE.Float32BufferAttribute(nodeColors, 3));
+      
+      const nodesMaterial = new THREE.PointsMaterial({
+        size: 0.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9
+      });
+      const nodesMesh = new THREE.Points(nodesGeometry, nodesMaterial);
+      neuralNetworkGroup.add(nodesMesh);
+
+      // Lines Mesh
+      const linesGeometry = new THREE.BufferGeometry();
+      linesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+      linesGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+      
+      const linesMaterial = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.25 // brighter lines
+      });
+      const linesMesh = new THREE.LineSegments(linesGeometry, linesMaterial);
+      neuralNetworkGroup.add(linesMesh);
+
+      scene.add(neuralNetworkGroup);
+      
+      // Track Scrolling for Parallax
+      window.addEventListener('scroll', () => {
+        targetScrollY = window.scrollY;
+      });
+
+      animate();
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Smooth Scroll Interpolation (Lerp)
+      currentScrollY += (targetScrollY - currentScrollY) * 0.05;
+      const time = Date.now() * 0.0001;
+
+      // Dynamic space movement: rotation + deep shifting based on scroll
+      neuralNetworkGroup.rotation.y = (time * 0.4) + (currentScrollY * 0.001);
+      neuralNetworkGroup.rotation.x = (time * 0.2) + (currentScrollY * 0.0005);
+      
+      // Plunge forward into the neural net as you scroll down
+      neuralNetworkGroup.position.z = currentScrollY * 0.02;
+      neuralNetworkGroup.position.y = -currentScrollY * 0.01;
+      
+      renderer.render(scene, camera);
+    }
+    
+    window.addEventListener('resize', () => {
+      if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    });
+
+    // Initialize
+    window.onload = () => {
+      initThree();
+      renderRoadmap();
+    };
+  </script>
 </body>
-</html>
+  </html>
