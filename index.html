@@ -12,42 +12,70 @@
     
     body { 
       font-family: 'Inter', sans-serif; 
-      background-color: #050507; /* Deepest space grey/black */
+      background-color: #050507; 
       color: #ffffff;
+      overflow-x: hidden;
     }
     .title { font-family: 'Space Grotesk', sans-serif; }
     
     #canvas { position: fixed; top: 0; left: 0; z-index: -1; }
     
-    /* Solid crisp cards, no blur */
-    .solid-card {
-      background: #0a0a0c;
-      border: 1px solid rgba(0, 255, 200, 0.2);
-      transition: all 0.3s ease;
-    }
-    
-    .solid-card:hover {
-      transform: translateY(-8px);
-      border-color: #ff007a; /* Contrast Pink */
-      box-shadow: 0 10px 30px -10px rgba(255, 0, 122, 0.3);
-    }
-    
+    /* Text Glows */
     .neon-cyan {
       text-shadow: 0 0 10px rgba(0, 255, 200, 0.6), 0 0 20px rgba(0, 255, 200, 0.4);
       color: #00ffc8;
     }
-    
     .neon-pink {
       text-shadow: 0 0 10px rgba(255, 0, 122, 0.6), 0 0 20px rgba(255, 0, 122, 0.4);
       color: #ff007a;
     }
 
-    /* Roadmap Game specific styles */
-    .roadmap-node {
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    /* -----------------------------------
+       3D POPPING CARD STYLES
+       ----------------------------------- */
+    .tilt-wrapper {
+      perspective: 1500px; /* Depth of the 3D effect */
+      transform-style: preserve-3d;
     }
-    .roadmap-line {
-      transition: background-color 0.8s ease, box-shadow 0.8s ease;
+
+    .tilt-card {
+      background: #0a0a0c;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, border-color 0.3s ease;
+      /* Thick 3D physical shadow */
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.1);
+    }
+
+    .tilt-card:hover {
+      border-color: rgba(0, 255, 200, 0.5);
+    }
+    
+    .tilt-card.pink-hover:hover {
+      border-color: rgba(255, 0, 122, 0.5);
+    }
+
+    /* This class makes the inner content POP out towards the user */
+    .pop-out {
+      transform: translateZ(80px); /* Pushes element 80px closer to the screen */
+      transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .tilt-card:hover .pop-out {
+      transform: translateZ(120px) scale(1.05); /* Extra pop on hover */
+    }
+
+    /* Floating animation for icons */
+    @keyframes float {
+      0% { transform: translateY(0px) translateZ(80px); }
+      50% { transform: translateY(-10px) translateZ(80px); }
+      100% { transform: translateY(0px) translateZ(80px); }
+    }
+    .icon-3d {
+      animation: float 4s ease-in-out infinite;
+      font-size: 4rem;
+      filter: drop-shadow(0 15px 15px rgba(0,0,0,0.5));
     }
 
     /* Custom Scrollbar */
@@ -57,202 +85,249 @@
     ::-webkit-scrollbar-thumb:hover { background: #00ffc8; }
   </style>
 </head>
-<body class="overflow-x-hidden">
+<body>
   <canvas id="canvas"></canvas>
 
-  <nav class="fixed top-0 left-0 right-0 z-50 bg-[#050507] border-b border-gray-800">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-[#050507]/90 backdrop-blur-sm border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
       <div class="text-2xl font-bold title tracking-tighter neon-cyan">DARSHAN</div>
-      <div class="hidden md:flex gap-8 text-sm font-bold tracking-wide">
+      <div class="hidden md:flex gap-8 text-sm font-bold tracking-wide items-center">
         <a href="#about" class="text-gray-300 hover:text-[#00ffc8] transition-colors">ABOUT</a>
-        <a href="#roadmap" class="text-gray-300 hover:text-[#ff007a] transition-colors">SKILLS</a>
+        <a href="#skills" class="text-gray-300 hover:text-[#ff007a] transition-colors">SKILLS</a>
         <a href="#projects" class="text-gray-300 hover:text-[#00ffc8] transition-colors">PROJECTS</a>
+        <div class="flex gap-4 ml-4 pl-4 border-l border-gray-700">
+          <a href="https://github.com/stoicdarsh" target="_blank" class="text-xl text-gray-400 hover:text-white transition-all hover:scale-110"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/darshan-suthar-8a1921386" target="_blank" class="text-xl text-gray-400 hover:text-[#0077b5] transition-all hover:scale-110"><i class="fab fa-linkedin"></i></a>
+        </div>
       </div>
     </div>
   </nav>
 
-  <section class="min-h-screen flex items-center relative">
-    <div class="max-w-4xl mx-auto px-6 text-center z-10 mt-20 md:mt-0">
-      <h1 class="text-6xl md:text-8xl font-bold title tracking-tighter mb-4 text-white">
-        Hi, I'm <span class="neon-cyan">Darshan</span>
-      </h1>
-      <p class="text-2xl md:text-4xl font-bold mb-8 neon-pink">AI &amp; Machine Learning Engineer</p>
-      <p class="max-w-md mx-auto text-lg text-gray-300 mb-12 font-medium">
-        Building intelligent, scalable neural networks and systems that map the future.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="#projects" 
-           class="px-8 py-4 bg-[#00ffc8] text-black hover:bg-white hover:text-black font-bold rounded-full transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,255,200,0.4)]">
-          <i class="fas fa-network-wired"></i> View Outputs
-        </a>
-        <a href="#roadmap" 
-           class="px-8 py-4 bg-[#0a0a0c] border border-[#ff007a] text-[#ff007a] hover:bg-[#ff007a] hover:text-white font-bold rounded-full transition-all shadow-[0_0_15px_rgba(255,0,122,0.2)]">
-          Play Roadmap
-        </a>
+  <section class="min-h-screen flex items-center justify-center relative">
+    <div class="max-w-5xl mx-auto px-6 text-center z-10 mt-20 md:mt-0 tilt-wrapper w-full">
+      <div class="tilt-card p-12 md:p-20 bg-transparent border-none shadow-none" data-tilt>
+        <div class="pop-out">
+          <h1 class="text-7xl md:text-9xl font-bold title tracking-tighter mb-4 text-white drop-shadow-2xl">
+            DARSHAN <span class="neon-cyan block md:inline mt-2">SUTHAR</span>
+          </h1>
+          
+          <div class="mt-8 mb-10 transform-style-3d">
+            <h2 class="text-3xl md:text-5xl font-bold neon-pink mb-6">AI &amp; Machine Learning Engineer</h2>
+            <p class="max-w-2xl mx-auto text-xl text-gray-300 font-medium leading-relaxed drop-shadow-lg">
+              Architecting intelligent neural networks, scaling complex data pipelines, and transforming raw information into cognitive 3D reality.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-6 justify-center mt-12 pop-out">
+            <a href="#projects" class="px-10 py-5 bg-[#00ffc8] text-black hover:bg-white font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(0,255,200,0.4)] hover:-translate-y-2">
+              <i class="fas fa-network-wired text-xl"></i> View Architecture
+            </a>
+            <a href="#contact" class="px-10 py-5 bg-[#0a0a0c] border-2 border-[#ff007a] text-[#ff007a] hover:bg-[#ff007a] hover:text-white font-bold rounded-xl transition-all shadow-[0_10px_30px_rgba(255,0,122,0.2)] hover:-translate-y-2">
+              Initialize Connection
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="roadmap" class="py-32 relative z-10 bg-[#050507]">
-    <div class="max-w-5xl mx-auto px-6">
-      <div class="text-center mb-24">
-        <h2 class="text-4xl md:text-5xl font-bold title mb-4 text-white">Skill Progression <span class="neon-pink">Map</span></h2>
-        <p class="text-[#00ffc8] font-medium text-lg">Hover to solve the pathway and unlock the neural net.</p>
+  <section id="skills" class="py-32 relative z-10 bg-[#050507]">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-24 tilt-wrapper">
+        <h2 class="text-5xl md:text-6xl font-bold title mb-4 text-white pop-out" data-tilt>
+          Cognitive <span class="neon-cyan">Vectors</span>
+        </h2>
+        <p class="text-gray-400 font-medium text-xl">Hover over modules to engage physical 3D analysis.</p>
       </div>
       
-      <div class="relative wrap overflow-hidden p-4 md:p-10 h-full" id="roadmap-container">
-        <div class="hidden md:block absolute border-opacity-20 border-white h-full border-l-2 left-1/2 top-0 -translate-x-1/2"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         
+        <div class="tilt-wrapper h-80">
+          <div class="tilt-card h-full p-8 flex flex-col justify-center items-center text-center relative group" data-tilt>
+            <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl rounded-t-xl"></div>
+            <div class="pop-out icon-3d mb-6 text-[#00ffc8]">🐍</div>
+            <div class="pop-out">
+              <h3 class="text-3xl font-bold text-white mb-3">Python Core</h3>
+              <p class="text-gray-400 font-medium">Data structures, OOP, & scripting for heavy computational loads.</p>
+            </div>
+          </div>
         </div>
+
+        <div class="tilt-wrapper h-80">
+          <div class="tilt-card pink-hover h-full p-8 flex flex-col justify-center items-center text-center relative group" data-tilt>
+            <div class="absolute inset-0 bg-gradient-to-b from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+            <div class="pop-out icon-3d mb-6 text-[#ff007a]">🧠</div>
+            <div class="pop-out">
+              <h3 class="text-3xl font-bold text-white mb-3">Deep Learning</h3>
+              <p class="text-gray-400 font-medium">Architecting Neural Networks via TensorFlow & PyTorch.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tilt-wrapper h-80">
+          <div class="tilt-card h-full p-8 flex flex-col justify-center items-center text-center relative group" data-tilt>
+            <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+            <div class="pop-out icon-3d mb-6 text-[#00ffc8]">👁️</div>
+            <div class="pop-out">
+              <h3 class="text-3xl font-bold text-white mb-3">Computer Vision</h3>
+              <p class="text-gray-400 font-medium">CNNs, OpenCV, and complex Image Segmentation models.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tilt-wrapper h-80">
+          <div class="tilt-card pink-hover h-full p-8 flex flex-col justify-center items-center text-center relative group" data-tilt>
+            <div class="absolute inset-0 bg-gradient-to-b from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+            <div class="pop-out icon-3d mb-6 text-[#ff007a]">🦜</div>
+            <div class="pop-out">
+              <h3 class="text-3xl font-bold text-white mb-3">NLP & LLMs</h3>
+              <p class="text-gray-400 font-medium">HuggingFace, Transformers, and custom Attention Mechanisms.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tilt-wrapper h-80">
+          <div class="tilt-card h-full p-8 flex flex-col justify-center items-center text-center relative group" data-tilt>
+            <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+            <div class="pop-out icon-3d mb-6 text-[#00ffc8]">⚙️</div>
+            <div class="pop-out">
+              <h3 class="text-3xl font-bold text-white mb-3">MLOps Base</h3>
+              <p class="text-gray-400 font-medium">Docker, Kubernetes, and optimized ONNX deployments.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tilt-wrapper h-80">
+          <div class="tilt-card pink-hover h-full p-8 flex flex-col justify-center items-center text-center relative group" data-tilt>
+            <div class="absolute inset-0 bg-gradient-to-b from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"></div>
+            <div class="pop-out icon-3d mb-6 text-[#ff007a]">📊</div>
+            <div class="pop-out">
+              <h3 class="text-3xl font-bold text-white mb-3">Classical ML</h3>
+              <p class="text-gray-400 font-medium">Scikit-learn pipelines, Random Forests, and XGBoost.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
 
-  <section id="projects" class="py-24 relative z-10 bg-[#050507] border-t border-gray-800">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-4xl md:text-5xl font-bold title text-center mb-16 text-white">System <span class="neon-cyan">Outputs</span></h2>
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="solid-card rounded-2xl overflow-hidden group">
-          <div class="h-48 bg-[#0a0a0c] border-b border-gray-800 flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
-            <i class="fas fa-eye text-6xl text-[#00ffc8] group-hover:scale-110 transition-transform duration-500"></i>
-          </div>
-          <div class="p-8">
-            <h3 class="text-2xl font-bold mb-3 text-white">Vision Transformer for Oncology</h3>
-            <p class="text-gray-300 text-base leading-relaxed">Engineered a custom ViT architecture achieving 96.8% accuracy in tumor detection from MRI scans. Optimized for inference speed on clinical hardware.</p>
+  <section id="projects" class="py-32 relative z-10 bg-[#050507] border-t border-gray-800">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-5xl md:text-6xl font-bold title text-center mb-24 text-white">System <span class="neon-pink">Outputs</span></h2>
+      
+      <div class="grid md:grid-cols-2 gap-12">
+        
+        <div class="tilt-wrapper">
+          <div class="tilt-card h-full group" data-tilt>
+            <div class="h-64 bg-[#0a0a0c] border-b border-gray-800 flex items-center justify-center relative overflow-hidden rounded-t-2xl">
+              <div class="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
+              <div class="pop-out">
+                <i class="fas fa-microscope text-8xl text-[#00ffc8] drop-shadow-[0_0_20px_rgba(0,255,200,0.8)]"></i>
+              </div>
+            </div>
+            <div class="p-10 relative">
+              <div class="pop-out">
+                <h3 class="text-3xl font-bold mb-4 text-white group-hover:text-[#00ffc8] transition-colors">Vision Transformer for Oncology</h3>
+                <p class="text-gray-300 text-lg leading-relaxed mb-6">Engineered a custom ViT architecture achieving 96.8% accuracy in tumor detection from MRI scans. Optimized for inference speed on edge clinical hardware.</p>
+                <div class="flex gap-3">
+                  <span class="px-4 py-2 bg-gray-900 rounded-lg text-xs font-bold text-[#00ffc8]">PyTorch</span>
+                  <span class="px-4 py-2 bg-gray-900 rounded-lg text-xs font-bold text-[#00ffc8]">OpenCV</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
-        <div class="solid-card rounded-2xl overflow-hidden group">
-          <div class="h-48 bg-[#0a0a0c] border-b border-gray-800 flex items-center justify-center relative overflow-hidden">
-             <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
-            <i class="fas fa-scale-balanced text-6xl text-[#ff007a] group-hover:scale-110 transition-transform duration-500"></i>
-          </div>
-          <div class="p-8">
-            <h3 class="text-2xl font-bold mb-3 text-white">RAG-Powered Legal Agent</h3>
-            <p class="text-gray-300 text-base leading-relaxed">Fine-tuned open-source LLMs combined with highly-optimized vector databases to navigate complex case law. Reduced document review time by 60%.</p>
+        <div class="tilt-wrapper">
+          <div class="tilt-card pink-hover h-full group" data-tilt>
+            <div class="h-64 bg-[#0a0a0c] border-b border-gray-800 flex items-center justify-center relative overflow-hidden rounded-t-2xl">
+               <div class="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"></div>
+               <div class="pop-out">
+                 <i class="fas fa-scale-balanced text-8xl text-[#ff007a] drop-shadow-[0_0_20px_rgba(255,0,122,0.8)]"></i>
+               </div>
+            </div>
+            <div class="p-10 relative">
+              <div class="pop-out">
+                <h3 class="text-3xl font-bold mb-4 text-white group-hover:text-[#ff007a] transition-colors">RAG-Powered Legal Agent</h3>
+                <p class="text-gray-300 text-lg leading-relaxed mb-6">Fine-tuned open-source LLMs combined with highly-optimized vector databases to navigate complex case law. Reduced document review time by 60%.</p>
+                <div class="flex gap-3">
+                  <span class="px-4 py-2 bg-gray-900 rounded-lg text-xs font-bold text-[#ff007a]">LangChain</span>
+                  <span class="px-4 py-2 bg-gray-900 rounded-lg text-xs font-bold text-[#ff007a]">HuggingFace</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
   <section id="contact" class="py-32 relative z-10 bg-[#050507] border-t border-gray-800">
-    <div class="max-w-md mx-auto px-6 text-center">
-      <h2 class="text-4xl md:text-5xl font-bold title mb-8 text-white">Initialize <span class="neon-pink">Connection</span></h2>
-      <a href="mailto:your.email@example.com" 
-         class="inline-block px-10 py-4 bg-white text-black font-bold rounded-full hover:bg-[#ff007a] hover:text-white hover:shadow-[0_0_30px_rgba(255,0,122,0.6)] transition-all text-lg">
-        Execute Hello_World →
-      </a>
-      <div class="mt-16 flex justify-center gap-8 text-3xl">
-        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-github"></i></a>
-        <a href="#" class="text-gray-400 hover:text-[#00ffc8] transition-colors"><i class="fab fa-linkedin"></i></a>
-        <a href="#" class="text-gray-400 hover:text-[#ff007a] transition-colors"><i class="fab fa-x-twitter"></i></a>
+    <div class="max-w-2xl mx-auto px-6 text-center tilt-wrapper">
+      <div class="tilt-card p-12 bg-transparent border-none shadow-none" data-tilt>
+        <div class="pop-out">
+          <h2 class="text-5xl md:text-7xl font-bold title mb-8 text-white">Initialize <span class="neon-cyan">Connection</span></h2>
+          <p class="text-xl text-gray-400 mb-12">System ready for deployment. Connect via the protocols below.</p>
+          
+          <div class="flex flex-col md:flex-row justify-center gap-8 mb-16">
+            <a href="https://github.com/stoicdarsh" target="_blank" 
+               class="flex items-center justify-center gap-4 px-8 py-6 bg-[#111] border border-gray-700 hover:border-[#00ffc8] rounded-2xl hover:bg-[#00ffc8] hover:text-black transition-all text-2xl font-bold group shadow-lg">
+              <i class="fab fa-github text-4xl group-hover:scale-110 transition-transform"></i>
+              GitHub
+            </a>
+            
+            <a href="https://www.linkedin.com/in/darshan-suthar-8a1921386?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" 
+               class="flex items-center justify-center gap-4 px-8 py-6 bg-[#111] border border-gray-700 hover:border-[#ff007a] rounded-2xl hover:bg-[#0077b5] hover:text-white transition-all text-2xl font-bold group shadow-lg">
+              <i class="fab fa-linkedin text-4xl group-hover:scale-110 transition-transform"></i>
+              LinkedIn
+            </a>
+          </div>
+
+          <a href="mailto:your.email@example.com" 
+             class="inline-block px-12 py-5 bg-white text-black font-bold rounded-full hover:bg-gray-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all text-xl">
+            Execute Mailto →
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
   <script>
     // ----------------------------------------------------
-    // PUZZLE ROADMAP LOGIC (GAME-LIKE UNLOCK)
+    // CUSTOM 3D VANILLA JS TILT ENGINE
     // ----------------------------------------------------
-    const roadmapSkills = [
-      { id: "python", name: "Python Core", desc: "Data structures, OOP, & scripting", icon: "🐍", color: "cyan" },
-      { id: "math", name: "Linear Algebra & Stats", desc: "The mathematical backbone of ML", icon: "➗", color: "pink" },
-      { id: "ml", name: "Classical ML", desc: "Scikit-learn, Random Forests, XGBoost", icon: "📊", color: "cyan" },
-      { id: "dl", name: "Deep Learning Base", desc: "Neural Networks via TensorFlow & PyTorch", icon: "🧠", color: "pink" },
-      { id: "cv", name: "Computer Vision", desc: "CNNs, OpenCV, Image Segmentation", icon: "👁️", color: "cyan" },
-      { id: "nlp", name: "NLP & Transformers", desc: "HuggingFace, LLMs, Attention Mechanisms", icon: "🦜", color: "pink" },
-      { id: "mlops", name: "MLOps & Deployment", desc: "Docker, Kubernetes, AWS, ONNX", icon: "⚙️", color: "cyan" }
-    ];
+    const tiltCards = document.querySelectorAll('[data-tilt]');
 
-    let currentUnlockedIndex = 0;
-
-    function renderRoadmap() {
-      const container = document.getElementById('roadmap-container');
-      
-      roadmapSkills.forEach((skill, index) => {
-        // Alignment logic for Zig Zag (Desktop)
-        const isLeft = index % 2 === 0;
-        const alignClass = isLeft ? 'md:flex-row-reverse md:mr-auto' : 'md:ml-auto';
-        const textClass = isLeft ? 'md:text-right' : 'md:text-left';
+    tiltCards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        // Calculate mouse position relative to the center of the card
+        const x = e.clientX - rect.left; 
+        const y = e.clientY - rect.top; 
         
-        // Coloring
-        const borderGlow = skill.color === 'cyan' ? 'border-[#00ffc8]' : 'border-[#ff007a]';
-        const textGlow = skill.color === 'cyan' ? 'text-[#00ffc8]' : 'text-[#ff007a]';
-
-        // HTML structure for a node
-        const nodeHTML = `
-          <div class="mb-8 flex justify-between items-center w-full md:w-[50%] ${alignClass} group" id="wrap-${index}">
-            
-            <div class="hidden md:flex w-8 h-8 rounded-full bg-[#0a0a0c] border-4 border-gray-700 absolute left-1/2 -translate-x-1/2 z-10 transition-colors duration-500" id="dot-${index}"></div>
-
-            <div class="w-full md:w-[85%] roadmap-node opacity-20 grayscale pointer-events-none cursor-pointer" 
-                 id="node-${index}" 
-                 onmouseenter="unlockNext(${index})"
-                 onclick="unlockNext(${index})">
-              
-              <div class="bg-[#0a0a0c] p-6 rounded-2xl border ${borderGlow} shadow-lg transition-transform hover:-translate-y-2 relative overflow-hidden">
-                <div class="text-4xl mb-3">${skill.icon}</div>
-                <h3 class="text-2xl font-bold text-white mb-2">${skill.name}</h3>
-                <p class="text-gray-400 font-medium">${skill.desc}</p>
-                <div class="mt-4 text-xs font-bold tracking-widest ${textGlow} uppercase flex items-center ${isLeft ? 'md:justify-end' : 'justify-start'}">
-                  ${index === 0 ? 'START HERE' : 'LOCKED'}
-                </div>
-              </div>
-            </div>
-
-            ${index < roadmapSkills.length - 1 ? `<div class="md:hidden w-1 h-12 bg-gray-800 ml-6 roadmap-line" id="mobile-line-${index}"></div>` : ''}
-          </div>
-        `;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
         
-        container.innerHTML += nodeHTML;
+        // Calculate rotation based on cursor position (-15 to 15 degrees)
+        const rotateX = ((y - centerY) / centerY) * -15; 
+        const rotateY = ((x - centerX) / centerX) * 15;
+
+        // Apply dynamic 3D transform
+        card.style.transform = `perspective(1500px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
       });
 
-      // Unlock the first node immediately
-      activateNode(0);
-    }
-
-    function activateNode(index) {
-      const node = document.getElementById(`node-${index}`);
-      const dot = document.getElementById(`dot-${index}`);
-      
-      // Remove locked styles
-      node.classList.remove('opacity-20', 'grayscale', 'pointer-events-none');
-      node.classList.add('opacity-100');
-      
-      // Change label to UNLOCKED
-      const label = node.querySelector('.text-xs');
-      if(index !== 0) label.innerText = "SOLVED ✔";
-      
-      // Light up the dot on the timeline
-      if(dot) {
-        const color = roadmapSkills[index].color === 'cyan' ? 'border-[#00ffc8]' : 'border-[#ff007a]';
-        dot.classList.replace('border-gray-700', color);
-        dot.classList.add('bg-white');
-      }
-    }
-
-    function unlockNext(hoveredIndex) {
-      // If user hovers the current highest unlocked node, unlock the next one
-      if (hoveredIndex === currentUnlockedIndex && currentUnlockedIndex < roadmapSkills.length - 1) {
-        
-        // Light up the line connecting them (Mobile)
-        const mobileLine = document.getElementById(`mobile-line-${currentUnlockedIndex}`);
-        if(mobileLine) {
-          mobileLine.classList.replace('bg-gray-800', roadmapSkills[currentUnlockedIndex].color === 'cyan' ? 'bg-[#00ffc8]' : 'bg-[#ff007a]');
-          mobileLine.classList.add('shadow-[0_0_10px_currentColor]');
-        }
-
-        currentUnlockedIndex++;
-        activateNode(currentUnlockedIndex);
-      }
-    }
+      card.addEventListener('mouseleave', () => {
+        // Reset transform when mouse leaves
+        card.style.transform = `perspective(1500px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      });
+    });
 
     // ----------------------------------------------------
-    // HIGH-CONTRAST 3D NEURAL NETWORK (CYAN & MAGENTA)
+    // 3D NEURAL NETWORK BACKGROUND (THREE.JS)
     // ----------------------------------------------------
-    let scene, camera, renderer;
-    let neuralNetworkGroup;
+    let scene, camera, renderer, neuralNetworkGroup;
     let targetScrollY = 0;
     let currentScrollY = 0;
 
@@ -260,10 +335,10 @@
       const canvas = document.getElementById('canvas');
       
       scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x050507, 0.012); // Deep dark fog
+      scene.fog = new THREE.FogExp2(0x050507, 0.012); 
       
       camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 50; // Pull camera back to see more space
+      camera.position.z = 50; 
       
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -272,31 +347,28 @@
 
       neuralNetworkGroup = new THREE.Group();
       
-      const nodeCount = 450; 
+      const nodeCount = 400; 
       const nodePositions = [];
       const nodeColors = [];
       
       const colorCyan = new THREE.Color(0x00ffc8);
       const colorPink = new THREE.Color(0xff007a);
 
-      // Distribute nodes in a wide 3D space
       for(let i = 0; i < nodeCount; i++) {
         nodePositions.push(
-          (Math.random() - 0.5) * 120, // X stretch
-          (Math.random() - 0.5) * 120, // Y stretch
-          (Math.random() - 0.5) * 80   // Z depth
+          (Math.random() - 0.5) * 120, 
+          (Math.random() - 0.5) * 120, 
+          (Math.random() - 0.5) * 80   
         );
         
-        // Randomly assign Cyan or Pink to nodes
         const isCyan = Math.random() > 0.5;
         const color = isCyan ? colorCyan : colorPink;
         nodeColors.push(color.r, color.g, color.b);
       }
 
-      // Generate synaptic lines
       const linePositions = [];
       const lineColors = [];
-      const maxDistance = 12; // Increase distance for more neural webbing
+      const maxDistance = 12; 
 
       for(let i = 0; i < nodeCount; i++) {
         for(let j = i + 1; j < nodeCount; j++) {
@@ -306,65 +378,42 @@
           const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
           
           if(distance < maxDistance) {
-            // Point A
             linePositions.push(nodePositions[i * 3], nodePositions[i * 3 + 1], nodePositions[i * 3 + 2]);
             lineColors.push(nodeColors[i * 3], nodeColors[i * 3 + 1], nodeColors[i * 3 + 2]);
-            // Point B
             linePositions.push(nodePositions[j * 3], nodePositions[j * 3 + 1], nodePositions[j * 3 + 2]);
             lineColors.push(nodeColors[j * 3], nodeColors[j * 3 + 1], nodeColors[j * 3 + 2]);
           }
         }
       }
 
-      // Nodes Mesh
       const nodesGeometry = new THREE.BufferGeometry();
       nodesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(nodePositions, 3));
       nodesGeometry.setAttribute('color', new THREE.Float32BufferAttribute(nodeColors, 3));
-      
-      const nodesMaterial = new THREE.PointsMaterial({
-        size: 0.5,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.9
-      });
-      const nodesMesh = new THREE.Points(nodesGeometry, nodesMaterial);
-      neuralNetworkGroup.add(nodesMesh);
+      const nodesMaterial = new THREE.PointsMaterial({ size: 0.6, vertexColors: true, transparent: true, opacity: 0.9 });
+      neuralNetworkGroup.add(new THREE.Points(nodesGeometry, nodesMaterial));
 
-      // Lines Mesh
       const linesGeometry = new THREE.BufferGeometry();
       linesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
       linesGeometry.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-      
-      const linesMaterial = new THREE.LineBasicMaterial({
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.25 // brighter lines
-      });
-      const linesMesh = new THREE.LineSegments(linesGeometry, linesMaterial);
-      neuralNetworkGroup.add(linesMesh);
+      const linesMaterial = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.25 });
+      neuralNetworkGroup.add(new THREE.LineSegments(linesGeometry, linesMaterial));
 
       scene.add(neuralNetworkGroup);
       
-      // Track Scrolling for Parallax
-      window.addEventListener('scroll', () => {
-        targetScrollY = window.scrollY;
-      });
-
+      window.addEventListener('scroll', () => { targetScrollY = window.scrollY; });
       animate();
     }
     
     function animate() {
       requestAnimationFrame(animate);
       
-      // Smooth Scroll Interpolation (Lerp)
       currentScrollY += (targetScrollY - currentScrollY) * 0.05;
       const time = Date.now() * 0.0001;
 
-      // Dynamic space movement: rotation + deep shifting based on scroll
       neuralNetworkGroup.rotation.y = (time * 0.4) + (currentScrollY * 0.001);
       neuralNetworkGroup.rotation.x = (time * 0.2) + (currentScrollY * 0.0005);
       
-      // Plunge forward into the neural net as you scroll down
+      // Depth shifting on scroll
       neuralNetworkGroup.position.z = currentScrollY * 0.02;
       neuralNetworkGroup.position.y = -currentScrollY * 0.01;
       
@@ -379,11 +428,17 @@
       }
     });
 
-    // Initialize
-    window.onload = () => {
-      initThree();
-      renderRoadmap();
-    };
+    // Smooth Anchor Scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        if (this.getAttribute('href') !== '#') {
+          e.preventDefault();
+          document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    window.onload = () => { initThree(); };
   </script>
 </body>
-  </html>
+</html>
